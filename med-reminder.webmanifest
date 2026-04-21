@@ -1,0 +1,16 @@
+{
+  "name": "복약 알림",
+  "short_name": "복약 알림",
+  "start_url": "/med-reminder/",
+  "display": "standalone",
+  "background_color": "#fdf4ff",
+  "theme_color": "#a78bfa",
+  "icons": [
+    {
+      "src": "./icon-b-premium.svg",
+      "sizes": "1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
