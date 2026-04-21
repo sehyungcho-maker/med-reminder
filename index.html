@@ -303,8 +303,9 @@
   <section class="card" aria-labelledby="ios-title">
     <h2 id="ios-title">아이폰 사용 안내</h2>
     <p class="notice">
-      <strong>중요:</strong> 웹앱은 잠금 화면에서 알림이 누락될 수 있어요. Safari에서
-      <strong>공유 → 홈 화면에 추가</strong> 후 사용하면 가장 안정적입니다.
+      <strong>중요:</strong> 잠금 화면 알림을 받으려면 Safari에서
+      <strong>공유 → 홈 화면에 추가</strong> 후 홈 화면 앱으로 실행하세요.
+      브라우저에서 직접 열면 잠금화면 알림이 오지 않아요.
     </p>
   </section>
 
@@ -335,6 +336,15 @@
       const STORAGE_MEDS = "medReminder_meds_v1";
       const STORAGE_LOG = "medReminder_log_v1";
       const STORAGE_FIRED = "medReminder_fired_v1";
+
+      // ── Service Worker 등록 ──────────────────────────
+      let swReg = null;
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => { swReg = reg; })
+          .catch(err => console.warn('SW 등록 실패:', err));
+      }
+      // ─────────────────────────────────────────────────
 
       const el = {
         medName: document.getElementById("medName"),
@@ -637,8 +647,9 @@
         el.calendarGrid.innerHTML = cells.join("");
       }
 
+      // ── 알림 전송 (Service Worker 방식 — 잠금화면 지원) ──
       function tryNotify(med, time) {
-        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
         const key = todayKey();
         const dk = doseKey(med.id, time);
         const fired = loadFired();
@@ -646,16 +657,23 @@
         if (fired[key][dk]) return;
         fired[key][dk] = true;
         saveFired(fired);
-        try {
-          new Notification("복약 시간", {
-            body: med.name + " (" + time + ") 복용 시간이에요.",
-            icon: "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect fill="%2338bdf8" width="64" height="64" rx="12"/><text x="32" y="42" text-anchor="middle" fill="%230f172a" font-size="28" font-family="sans-serif">💊</text></svg>'),
-            tag: "med-" + med.id + "-" + time + "-" + key,
-          });
-        } catch (e) {
-          console.warn(e);
+
+        const title = '복약 시간 💊';
+        const body = med.name + ' (' + time + ') 복용 시간이에요.';
+        const tag = 'med-' + med.id + '-' + time + '-' + key;
+
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          // SW가 활성화된 경우 — 잠금화면에서도 알림 표시
+          navigator.serviceWorker.controller.postMessage({ type: 'NOTIFY', title, body, tag });
+        } else if (swReg) {
+          // SW 등록됐지만 아직 controller가 없는 경우
+          swReg.showNotification(title, { body, tag, icon: './icon-b-premium.svg' });
+        } else {
+          // 폴백 (구형 브라우저)
+          try { new Notification(title, { body, tag }); } catch (e) { console.warn(e); }
         }
       }
+      // ──────────────────────────────────────────────────────
 
       function notifyNowForTest() {
         if (!("Notification" in window)) {
@@ -666,13 +684,16 @@
           alert("먼저 '알림 허용'을 눌러 권한을 허용해 주세요.");
           return;
         }
-        try {
-          new Notification("복약 알림 테스트", {
-            body: "알림이 보이면 설정은 정상입니다.",
-            tag: "med-test-" + Date.now(),
-          });
-        } catch (e) {
-          console.warn(e);
+        const title = '복약 알림 테스트 💊';
+        const body = '알림이 보이면 설정은 정상입니다.';
+        const tag = 'med-test-' + Date.now();
+
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'NOTIFY', title, body, tag });
+        } else if (swReg) {
+          swReg.showNotification(title, { body, tag, icon: './icon-b-premium.svg' });
+        } else {
+          try { new Notification(title, { body, tag }); } catch (e) { console.warn(e); }
         }
       }
 
