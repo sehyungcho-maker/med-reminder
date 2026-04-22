@@ -44,16 +44,10 @@
       margin-bottom: 24px;
     }
     header h1 {
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      margin: 0 0 6px;
-      letter-spacing: -0.02em;
-    }
-    header p {
       margin: 0;
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.4;
+      letter-spacing: -0.02em;
     }
     .card {
       background: var(--surface);
@@ -276,8 +270,24 @@
 <body>
   <header>
     <h1>복약 알림</h1>
-    <p>약 이름과 복용 시간(여러 개 가능)을 등록하면 알림을 보내고, 오늘 복용 여부를 체크할 수 있어요.</p>
   </header>
+
+  <section class="card" aria-labelledby="today-title">
+    <h2 id="today-title">오늘의 복용</h2>
+    <div class="today-date" id="todayLabel"></div>
+    <div id="todayChecks"></div>
+  </section>
+
+  <section class="card" aria-labelledby="calendar-title">
+    <h2 id="calendar-title">복용 달력</h2>
+    <div class="cal-head">
+      <button type="button" class="btn-ghost" id="btnPrevMonth">이전 달</button>
+      <div class="cal-title" id="monthLabel"></div>
+      <button type="button" class="btn-ghost" id="btnNextMonth">다음 달</button>
+    </div>
+    <div class="cal-grid" id="weekHeader"></div>
+    <div class="cal-grid" id="calendarGrid"></div>
+  </section>
 
   <section class="card" aria-labelledby="add-title">
     <h2 id="add-title">알림 등록</h2>
@@ -300,6 +310,11 @@
     </div>
   </section>
 
+  <section class="card" aria-labelledby="list-title">
+    <h2 id="list-title">등록된 약</h2>
+    <div id="medList" class="list-empty">등록된 약이 없습니다.</div>
+  </section>
+
   <section class="card" aria-labelledby="ios-title">
     <h2 id="ios-title">아이폰 사용 안내</h2>
     <p class="notice">
@@ -307,28 +322,6 @@
       <strong>공유 → 홈 화면에 추가</strong> 후 홈 화면 앱으로 실행하세요.
       브라우저에서 직접 열면 잠금화면 알림이 오지 않아요.
     </p>
-  </section>
-
-  <section class="card" aria-labelledby="list-title">
-    <h2 id="list-title">등록된 약</h2>
-    <div id="medList" class="list-empty">등록된 약이 없습니다.</div>
-  </section>
-
-  <section class="card" aria-labelledby="today-title">
-    <h2 id="today-title">오늘의 복용</h2>
-    <div class="today-date" id="todayLabel"></div>
-    <div id="todayChecks"></div>
-  </section>
-
-  <section class="card" aria-labelledby="calendar-title">
-    <h2 id="calendar-title">복용 달력</h2>
-    <div class="cal-head">
-      <button type="button" class="btn-ghost" id="btnPrevMonth">이전 달</button>
-      <div class="cal-title" id="monthLabel"></div>
-      <button type="button" class="btn-ghost" id="btnNextMonth">다음 달</button>
-    </div>
-    <div class="cal-grid" id="weekHeader"></div>
-    <div class="cal-grid" id="calendarGrid"></div>
   </section>
 
   <script>
