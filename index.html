@@ -583,11 +583,9 @@
         });
       }
 
-      function getStatusForDay(key, isFuture) {
-        const total = doseTotalCount();
+      function getStatusForDay(key, isFuture, total, log) {
         if (!total) return { text: "기록 없음", cls: "" };
         if (isFuture) return { text: "예정", cls: "" };
-        const log = loadLog();
         const count = Object.keys(log[key] || {}).length;
         if (count >= total) return { text: "완료", cls: "ok" };
         if (count <= 0) return { text: "미복용", cls: "bad" };
@@ -605,6 +603,8 @@
         const lastDate = new Date(year, month + 1, 0).getDate();
         const prevLastDate = new Date(year, month, 0).getDate();
         const today = todayKey();
+        const total = doseTotalCount();
+        const log = loadLog();
         const cells = [];
 
         for (let i = 0; i < startWeek; i++) {
@@ -616,7 +616,7 @@
           const d = new Date(year, month, day);
           const key = dayKey(d);
           const isToday = key === today;
-          const st = getStatusForDay(key, key > today);
+          const st = getStatusForDay(key, key > today, total, log);
           const cls = "cal-cell" + (isToday ? " today" : "");
           cells.push(
             '<div class="' +
